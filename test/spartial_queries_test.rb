@@ -45,7 +45,7 @@ module RGeo
         class TestSpatialQueries < ::Test::Unit::TestCase  # :nodoc:
 
           DATABASE_CONFIG_PATH = ::File.dirname(__FILE__)+'/database.yml'
-          include AdapterTestHelper
+          include RGeo::ActiveRecord::AdapterTestHelper
 
           define_test_methods do
 

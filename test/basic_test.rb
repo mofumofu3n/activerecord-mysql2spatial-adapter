@@ -31,7 +31,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------
-;
 
 require 'test/unit'
 require 'rgeo/active_record/adapter_test_helper'
@@ -45,7 +44,7 @@ module RGeo
         class TestBasic < ::Test::Unit::TestCase  # :nodoc:
 
           DATABASE_CONFIG_PATH = ::File.dirname(__FILE__)+'/database.yml'
-          include AdapterTestHelper
+          include RGeo::ActiveRecord::AdapterTestHelper
 
           define_test_methods do
 

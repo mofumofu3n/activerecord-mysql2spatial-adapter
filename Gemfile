@@ -24,10 +24,10 @@
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
 # LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# CONSEQUENTIAL DAMAGES  INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# INTERRUPTION  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT  INCLUDING NEGLIGENCE OR OTHERWISE
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------
@@ -36,13 +36,14 @@
 
 source "http://rubygems.org"
 
-gem('rgeo-activerecord', '~> 0.4.5')
-gem('mysql2', '>= 0.2.13')
-#gem('activerecord', '~> 3.0.16')
-#gem('activerecord', '~> 3.1.7')
-gem('activerecord', '~> 3.2.7')
+gem 'rgeo-activerecord', '~> 0.4.5'
+gem 'mysql2', '>= 0.2.13'
+#gem 'activerecord', '~> 3.0.16'
+#gem 'activerecord', '~> 3.1.7'
+gem 'activerecord', '~> 3.2.7'
+gem 'pry'
 
-group(:test) do
-  gem('rake', '>= 0.9.2')
-  gem('rdoc', '>= 3.12')
+group :test  do
+  gem 'rake', '>= 0.9.2'
+  gem 'rdoc', '>= 3.12'
 end
