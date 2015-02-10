@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------
 ;
 
-require 'test/unit'
+require 'minitest/autorun'
 require 'rgeo/active_record/adapter_test_helper'
 
 
@@ -42,7 +42,7 @@ module RGeo
     module Mysql2SpatialAdapter  # :nodoc:
       module Tests  # :nodoc:
 
-        class TestSpatialQueries < ::Test::Unit::TestCase  # :nodoc:
+        class TestSpatialQueries < ::Minitest::Test
 
           DATABASE_CONFIG_PATH = ::File.dirname(__FILE__)+'/database.yml'
           include RGeo::ActiveRecord::AdapterTestHelper
