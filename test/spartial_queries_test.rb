@@ -36,7 +36,7 @@
 require 'test_helper'
 
 
-class TestSpatialQueries < ::Minitest::Test
+class TestSpatialQueries < ::Minitest::Unit::TestCase
 
   DATABASE_CONFIG_PATH = ::File.dirname(__FILE__)+'/database.yml'
   include RGeo::ActiveRecord::AdapterTestHelper
