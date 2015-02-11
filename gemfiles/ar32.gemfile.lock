@@ -38,7 +38,7 @@ GEM
       slop (~> 3.4)
     rake (10.4.2)
     rgeo (0.3.20)
-    rgeo-activerecord (0.4.6)
+    rgeo-activerecord (0.6.0)
       activerecord (>= 3.0.3)
       arel (>= 2.0.6)
       rgeo (>= 0.3.20)
