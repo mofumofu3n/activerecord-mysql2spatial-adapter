@@ -64,6 +64,53 @@ module Arel
         end
       end
 
+      # Override equality nodes to use the ST_Equals function if at least
+      # one of the operands is a spatial node.
+      def visit_Arel_Nodes_Equality node #, collector
+        check_equality_for_rgeo(node, false) || super
+      end
+
+      # Override equality nodes to use the ST_Equals function if at least
+      # one of the operands is a spatial node.
+
+      def visit_Arel_Nodes_NotEqual(node_)
+        _check_equality_for_rgeo(node_, true) || super
+      end
+
+      private
+      # Returns a true value if the given node is of spatial type-- that
+      # is, if it is a spatial literal or a reference to a spatial
+      # attribute.
+      def node_has_spatial_type?(node)
+        case node
+        when ::Arel::Attribute
+          @connection.instance_variable_set(:@_getting_columns, true)
+          begin
+            col = column_for(node)
+            col && col.respond_to?(:spatial?) && col.spatial? ? true : false
+          ensure
+            @connection.instance_variable_set(:@_getting_columns, false)
+          end
+        when ::RGeo::ActiveRecord::SpatialNamedFunction
+          node.spatial_result?
+        when ::RGeo::ActiveRecord::SpatialConstantNode, ::RGeo::Feature::Instance
+          true
+        else
+          false
+        end
+      end
+
+      def check_equality_for_rgeo(node, negate)  # :nodoc:
+        left = node.left
+        right = node.right
+        if !@connection.instance_variable_get(:@_getting_columns) &&
+            !right.nil? && (node_has_spatial_type?(left) || node_has_spatial_type?(right))
+          "#{negate ? 'NOT ' : ''}#{st_func('ST_Equals')}(#{visit_in_spatial_context(left)}, #{visit_in_spatial_context(right)})"
+        else
+          false
+        end
+      end
+
     end
 
     VISITORS['mysql2spatial'] = ::Arel::Visitors::MySQL2Spatial
