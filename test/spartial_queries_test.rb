@@ -82,34 +82,33 @@ class TestSpatialQueries < ::Minitest::Unit::TestCase
 
 
   if ::RGeo::ActiveRecord.spatial_expressions_supported?
-    # TODO: Distance does not exists (But it probably has some other function similar)
-    # def test_query_st_distance
-    #   create_model
-    #   obj = SpatialModel.new
-    #   obj.latlon = @factory.point(1.0, 2.0)
-    #   obj.save!
-    #   id = obj.id
-    #   obj2 = SpatialModel.where(SpatialModel.arel_table[:latlon].st_distance('SRID=3785;POINT(2 3)').lt(2)).first
-    #   refute_nil(obj2)
-    #   assert_equal(id, obj2.id)
-    #   obj3 = SpatialModel.where(SpatialModel.arel_table[:latlon].st_distance('SRID=3785;POINT(2 3)').gt(2)).first
-    #   assert_nil(obj3)
-    # end
+    def test_query_st_distance
+      create_model
+      obj = SpatialModel.new
+      obj.latlon = @factory.point(1.0, 2.0)
+      obj.save!
+      id = obj.id
+      obj2 = SpatialModel.where(SpatialModel.arel_table[:latlon].st_distance('POINT(2 3),3785').lt(2)).first
+      refute_nil(obj2)
+      assert_equal(id, obj2.id)
+      obj3 = SpatialModel.where(SpatialModel.arel_table[:latlon].st_distance('POINT(2 3),3785').gt(2)).first
+      assert_nil(obj3)
+    end
 
 
     # TODO: Distance does not exists (But it probably has some other function similar)
-    # def test_query_st_distance_from_constant
-    #   create_model
-    #   obj = SpatialModel.new
-    #   obj.latlon = @factory.point(1.0, 2.0)
-    #   obj.save!
-    #   id = obj.id
-    #   obj2 = SpatialModel.where(::Arel.spatial('SRID=3785;POINT(2 3)').st_distance(SpatialModel.arel_table[:latlon]).lt(2)).first
-    #   refute_nil(obj2)
-    #   assert_equal(id, obj2.id)
-    #   obj3 = SpatialModel.where(::Arel.spatial('SRID=3785;POINT(2 3)').st_distance(SpatialModel.arel_table[:latlon]).gt(2)).first
-    #   assert_nil(obj3)
-    # end
+    def test_query_st_distance_from_constant
+      create_model
+      obj = SpatialModel.new
+      obj.latlon = @factory.point(1.0, 2.0)
+      obj.save!
+      id = obj.id
+      obj2 = SpatialModel.where(::Arel.spatial('POINT(2 3),3785').st_distance(SpatialModel.arel_table[:latlon]).lt(2)).first
+      refute_nil(obj2)
+      assert_equal(id, obj2.id)
+      obj3 = SpatialModel.where(::Arel.spatial('POINT(2 3),3785').st_distance(SpatialModel.arel_table[:latlon]).gt(2)).first
+      assert_nil(obj3)
+    end
 
     def test_query_st_length
       klass_ = populate_ar_class(:path_linestring)

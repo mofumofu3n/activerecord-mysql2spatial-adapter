@@ -49,6 +49,7 @@ module Arel
         'st_wkttosql' => 'GeomFromText',
         'st_wkbtosql' => 'GeomFromWKB',
         'st_length' => 'GLength',
+        'st_distance' => 'ST_Distance',
       }
 
       include ::RGeo::ActiveRecord::SpatialToSql
