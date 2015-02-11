@@ -50,7 +50,6 @@ class TestBasic < ::Minitest::Unit::TestCase
     klass_
   end
 
-
   def test_version
     assert(::ActiveRecord::ConnectionAdapters::Mysql2SpatialAdapter::VERSION != nil)
   end
@@ -96,7 +95,6 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal(3785, obj_.latlon.srid)
   end
 
-
   def test_set_and_get_point_from_wkt
     klass_ = populate_ar_class(:latlon_point)
     obj_ = klass_.new
@@ -105,7 +103,6 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal(@factory.point(1, 2), obj_.latlon)
     assert_equal(3785, obj_.latlon.srid)
   end
-
 
   def test_save_and_load_point
     klass_ = populate_ar_class(:latlon_point)
@@ -118,6 +115,18 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal(3785, obj2_.latlon.srid)
   end
 
+  # TODO: make pass
+  # def test_save_and_load_geographic_point
+  #   create_model
+  #   obj = SpatialModel.new
+  #   obj.latlon_geo = geographic_factory.point(1.0, 2.0)
+  #   obj.save!
+  #   id = obj.id
+  #   obj2 = SpatialModel.find(id)
+  #   assert_equal geographic_factory.point(1.0, 2.0), obj2.latlon_geo
+  #   assert_equal 4326, obj2.latlon_geo.srid
+  #   # assert_equal false, RGeo::Geos.is_geos?(obj2.latlon_geo)
+  # end
 
   def test_save_and_load_point_from_wkt
     klass_ = populate_ar_class(:latlon_point)
@@ -130,6 +139,33 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal(3785, obj2_.latlon.srid)
   end
 
+  def test_set_point_bad_wkt
+    klass_ = populate_ar_class(:latlon_point)
+    obj = klass_.create(latlon: 'POINT (x)')
+    assert_nil obj.latlon
+  end
+
+  # TODO
+  # def test_set_point_wkt_wrong_type
+  #   klass_ = populate_ar_class(:latlon_point)
+  #   assert_raises(ActiveRecord::StatementInvalid) do
+  #     klass_.create(latlon: 'LINESTRING(1 2, 3 4, 5 6)')
+  #   end
+  # end
+
+  def test_custom_factory
+    klass = create_ar_class
+    klass.connection.create_table(:spatial_test, force: true) do |t|
+      t.point(:latlon, srid: 4326)
+    end
+    factory = RGeo::Geographic.simple_mercator_factory
+    klass.class_eval do
+      set_rgeo_factory_for_column(:latlon, factory)
+    end
+    assert_equal factory, klass.rgeo_factory_for_column(:latlon)
+    object = klass.new
+    assert_equal factory, object.class.rgeo_factory_for_column(:latlon)
+  end
 
   def test_readme_example
     klass_ = create_ar_class
@@ -138,6 +174,8 @@ class TestBasic < ::Minitest::Unit::TestCase
       t_.line_string(:path)
       t_.geometry(:shape)
     end
+    klass_.reset_column_information
+    assert_includes klass_.columns.map(&:name), "shape"
     klass_.connection.change_table(:spatial_test) do |t_|
       t_.index(:latlon, :spatial => true)
     end
@@ -151,6 +189,22 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal(47, loc_.latitude)
     rec_.shape = loc_
     # assert_equal(true, ::RGeo::Geos.is_geos?(rec_.shape))
+  end
+
+  def test_point_to_json
+    klass = populate_ar_class(:latlon_point)
+    obj = klass.new
+    assert_match(/"latlon":null/, obj.to_json)
+    obj.latlon = @factory.point(1.0, 2.0)
+    assert_match(/"latlon":"POINT\s\(1\.0\s2\.0\)"/, obj.to_json)
+  end
+
+  def test_custom_column
+    klass = populate_ar_class(:latlon_point)
+    rec = klass.new
+    rec.latlon = 'POINT(0 0)'
+    rec.save
+    refute_nil klass.select("CURRENT_TIMESTAMP as ts").first.ts
   end
 
   def test_create_simple_geometry_using_shortcut
@@ -171,7 +225,6 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal(::RGeo::Feature::Point, klass_.columns.last.geometric_type)
     assert(klass_.cached_attributes.include?('latlon'))
   end
-
 
   def test_create_geometry_using_limit
     klass_ = create_ar_class
