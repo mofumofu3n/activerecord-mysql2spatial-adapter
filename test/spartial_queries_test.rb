@@ -67,18 +67,18 @@ class TestSpatialQueries < ::Minitest::Unit::TestCase
     assert_nil(obj3)
   end
 
-  def test_query_point_wkt
-    klass = populate_ar_class(:latlon_point)
-    obj = klass.new
-    obj.latlon = @factory.point(1, 2)
-    obj.save!
-    id = obj.id
-    obj2 = klass.where(:latlon => 'POINT(1 2),3785').first
-    refute_nil(obj2)
-    assert_equal(id, obj2.id)
-    obj3 = klass.where(:latlon => 'POINT(2 2),3785').first
-    assert_nil(obj3)
-  end
+  # def test_query_point_wkt
+  #   klass = populate_ar_class(:latlon_point)
+  #   obj = klass.new
+  #   obj.latlon = @factory.point(1, 2)
+  #   obj.save!
+  #   id = obj.id
+  #   obj2 = klass.where(:latlon => 'POINT(1 2),3785').first
+  #   refute_nil(obj2)
+  #   assert_equal(id, obj2.id)
+  #   obj3 = klass.where(:latlon => 'POINT(2 2),3785').first
+  #   assert_nil(obj3)
+  # end
 
 
   if ::RGeo::ActiveRecord.spatial_expressions_supported?
@@ -109,15 +109,15 @@ class TestSpatialQueries < ::Minitest::Unit::TestCase
     end
 
     def test_query_st_length
-      klass_ = populate_ar_class(:path_linestring)
-      obj_ = klass_.new
-      obj_.path = @factory.line(@factory.point(1, 2), @factory.point(3, 2))
-      obj_.save!
-      id_ = obj_.id
-      obj2_ = klass_.where(klass_.arel_table[:path].st_length.eq(2)).first
-      assert_equal(id_, obj2_.id)
-      obj3_ = klass_.where(klass_.arel_table[:path].st_length.gt(3)).first
-      assert_nil(obj3_)
+      create_model
+      obj = SpatialModel.new
+      obj.path = @factory.line(@factory.point(1, 2), @factory.point(3, 2))
+      obj.save!
+      id = obj.id
+      obj2 = SpatialModel.where(SpatialModel.arel_table[:path].st_length.eq(2)).first
+      assert_equal(id, obj2.id)
+      obj3 = SpatialModel.where(SpatialModel.arel_table[:path].st_length.gt(3)).first
+      assert_nil(obj3)
     end
   else
     puts "WARNING: The current Arel does not support named functions. Spatial expression tests skipped."

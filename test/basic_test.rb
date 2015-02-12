@@ -73,7 +73,6 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert(klass_.cached_attributes.include?('latlon'))
   end
 
-
   def test_create_geometry_with_index
     klass_ = create_ar_class
     klass_.connection.create_table(:spatial_test, :options => 'ENGINE=MyISAM') do |t_|
@@ -87,8 +86,8 @@ class TestBasic < ::Minitest::Unit::TestCase
 
 
   def test_set_and_get_point
-    klass_ = populate_ar_class(:latlon_point)
-    obj_ = klass_.new
+    create_model
+    obj_ = SpatialModel.new
     assert_nil(obj_.latlon)
     obj_.latlon = @factory.point(1, 2)
     assert_equal(@factory.point(1, 2), obj_.latlon)
@@ -96,8 +95,8 @@ class TestBasic < ::Minitest::Unit::TestCase
   end
 
   def test_set_and_get_point_from_wkt
-    klass_ = populate_ar_class(:latlon_point)
-    obj_ = klass_.new
+    create_model
+    obj_ = SpatialModel.new
     assert_nil(obj_.latlon)
     obj_.latlon = 'SRID=3785;POINT(1 2)'
     assert_equal(@factory.point(1, 2), obj_.latlon)
@@ -105,12 +104,12 @@ class TestBasic < ::Minitest::Unit::TestCase
   end
 
   def test_save_and_load_point
-    klass_ = populate_ar_class(:latlon_point)
-    obj_ = klass_.new
+    create_model
+    obj_ = SpatialModel.new
     obj_.latlon = @factory.point(1, 2)
     obj_.save!
     id_ = obj_.id
-    obj2_ = klass_.find(id_)
+    obj2_ = SpatialModel.find(id_)
     assert_equal(@factory.point(1, 2), obj2_.latlon)
     assert_equal(3785, obj2_.latlon.srid)
   end
@@ -129,61 +128,50 @@ class TestBasic < ::Minitest::Unit::TestCase
   # end
 
   def test_save_and_load_point_from_wkt
-    klass_ = populate_ar_class(:latlon_point)
-    obj_ = klass_.new
+    create_model
+    obj_ = SpatialModel.new
     obj_.latlon = 'SRID=3785;POINT(1 2)'
     obj_.save!
     id_ = obj_.id
-    obj2_ = klass_.find(id_)
+    obj2_ = SpatialModel.find(id_)
     assert_equal(@factory.point(1, 2), obj2_.latlon)
     assert_equal(3785, obj2_.latlon.srid)
   end
 
   def test_set_point_bad_wkt
-    klass_ = populate_ar_class(:latlon_point)
-    obj = klass_.create(latlon: 'POINT (x)')
+    create_model
+    obj = SpatialModel.create(latlon: 'POINT (x)')
     assert_nil obj.latlon
   end
 
   # TODO
   # def test_set_point_wkt_wrong_type
   #   klass_ = populate_ar_class(:latlon_point)
+  #   binding.pry
   #   assert_raises(ActiveRecord::StatementInvalid) do
   #     klass_.create(latlon: 'LINESTRING(1 2, 3 4, 5 6)')
   #   end
   # end
 
   def test_custom_factory
-    klass = create_ar_class
-    klass.connection.create_table(:spatial_test, force: true) do |t|
+    create_model
+    factory = RGeo::Geographic.simple_mercator_factory
+    MercatorModel.connection.create_table(:spatial_test, force: true) do |t|
       t.point(:latlon, srid: 4326)
     end
-    factory = RGeo::Geographic.simple_mercator_factory
-    klass.class_eval do
-      set_rgeo_factory_for_column(:latlon, factory)
-    end
-    assert_equal factory, klass.rgeo_factory_for_column(:latlon)
-    object = klass.new
+    assert_equal factory, MercatorModel.rgeo_factory_for_column(:latlon)
+    object = MercatorModel.new
     assert_equal factory, object.class.rgeo_factory_for_column(:latlon)
   end
 
   def test_readme_example
-    klass_ = create_ar_class
-    klass_.connection.create_table(:spatial_test, :options => 'ENGINE=MyISAM') do |t_|
-      t_.column(:latlon, :point, :null => false)
-      t_.line_string(:path)
-      t_.geometry(:shape)
+    create_model
+    GeographicModel.connection.change_table(:spatial_models) do |t|
+      t.change :latlon, :point, null: false
+      t.index(:latlon, :spatial => true)
     end
-    klass_.reset_column_information
-    assert_includes klass_.columns.map(&:name), "shape"
-    klass_.connection.change_table(:spatial_test) do |t_|
-      t_.index(:latlon, :spatial => true)
-    end
-    klass_.class_eval do
-      self.rgeo_factory_generator = ::RGeo::Geos.method(:factory)
-      set_rgeo_factory_for_column(:latlon, ::RGeo::Geographic.spherical_factory)
-    end
-    rec_ = klass_.new
+    assert_includes GeographicModel.columns.map(&:name), "shape"
+    rec_ = GeographicModel.new
     rec_.latlon = 'POINT(-122 47)'
     loc_ = rec_.latlon
     assert_equal(47, loc_.latitude)
@@ -192,49 +180,58 @@ class TestBasic < ::Minitest::Unit::TestCase
   end
 
   def test_point_to_json
-    klass = populate_ar_class(:latlon_point)
-    obj = klass.new
+    create_model
+    obj = SpatialModel.new
     assert_match(/"latlon":null/, obj.to_json)
     obj.latlon = @factory.point(1.0, 2.0)
     assert_match(/"latlon":"POINT\s\(1\.0\s2\.0\)"/, obj.to_json)
   end
 
   def test_custom_column
-    klass = populate_ar_class(:latlon_point)
-    rec = klass.new
+    create_model
+    rec = SpatialModel.new
     rec.latlon = 'POINT(0 0)'
     rec.save
-    refute_nil klass.select("CURRENT_TIMESTAMP as ts").first.ts
+    refute_nil SpatialModel.select("CURRENT_TIMESTAMP as ts").first.ts
   end
 
   def test_create_simple_geometry_using_shortcut
-    klass_ = create_ar_class
-    klass_.connection.create_table(:spatial_test) do |t_|
-      t_.geometry 'latlon'
+    create_model
+    SpatialModel.connection.change_table(:spatial_models) do |t_|
+      t_.geometry 'geometry_shortcut'
     end
-    assert_equal(::RGeo::Feature::Geometry, klass_.columns.last.geometric_type)
-    assert(klass_.cached_attributes.include?('latlon'))
+    assert_equal(::RGeo::Feature::Geometry, SpatialModel.columns.last.geometric_type)
+    assert(SpatialModel.new.respond_to?('geometry_shortcut'))
   end
 
-
   def test_create_point_geometry_using_shortcut
-    klass_ = create_ar_class
-    klass_.connection.create_table(:spatial_test) do |t_|
-      t_.point 'latlon'
+    create_model
+    SpatialModel.connection.change_table(:spatial_models) do |t_|
+      t_.point 'latlon_shortcut'
     end
-    assert_equal(::RGeo::Feature::Point, klass_.columns.last.geometric_type)
-    assert(klass_.cached_attributes.include?('latlon'))
+    assert_equal(::RGeo::Feature::Point, SpatialModel.columns.last.geometric_type)
+    assert(SpatialModel.new.respond_to?(:latlon_shortcut))
   end
 
   def test_create_geometry_using_limit
-    klass_ = create_ar_class
-    klass_.connection.create_table(:spatial_test) do |t_|
+    create_model
+    SpatialModel.connection.change_table(:spatial_models) do |t_|
       t_.spatial 'geom', :limit => {:type => :line_string}
     end
-    assert_equal(::RGeo::Feature::LineString, klass_.columns.last.geometric_type)
-    assert(klass_.cached_attributes.include?('geom'))
+    SpatialModel.reset_column_information
+    assert_equal(::RGeo::Feature::LineString, SpatialModel.columns.last.geometric_type)
+    assert(SpatialModel.new.respond_to?(:geom))
   end
 
-
+  private
+  def create_model
+    SpatialModel.connection.create_table(:spatial_models, force: true, :options => 'ENGINE=MyISAM' ) do |t|
+      t.column 'latlon', :point, srid: 3785
+      t.column 'latlon_geo', :point, srid: 4326, geographic: true
+      t.line_string(:path)
+      t.geometry(:shape)
+    end
+    SpatialModel.reset_column_information
+  end
 end
 
