@@ -156,8 +156,8 @@ class TestBasic < ::Minitest::Unit::TestCase
   def test_custom_factory
     create_model
     factory = RGeo::Geographic.simple_mercator_factory
-    MercatorModel.connection.create_table(:spatial_test, force: true) do |t|
-      t.point(:latlon, srid: 4326)
+    MercatorModel.connection.create_table(:spatial_models, force: true) do |t|
+      t.column(:latlon, :point, srid: 4326)
     end
     assert_equal factory, MercatorModel.rgeo_factory_for_column(:latlon)
     object = MercatorModel.new
@@ -228,8 +228,8 @@ class TestBasic < ::Minitest::Unit::TestCase
     SpatialModel.connection.create_table(:spatial_models, force: true, :options => 'ENGINE=MyISAM' ) do |t|
       t.column 'latlon', :point, srid: 3785
       t.column 'latlon_geo', :point, srid: 4326, geographic: true
-      t.line_string(:path)
-      t.geometry(:shape)
+      t.column :path, :line_string
+      t.column :shape, :geometry
     end
     SpatialModel.reset_column_information
   end

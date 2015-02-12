@@ -4,6 +4,5 @@ source "http://rubygems.org"
 
 gem "pry"
 gem "activerecord", "~> 3.2.0"
-gem "rgeo-activerecord", "0.4.6"
 
 gemspec :path => "../"
