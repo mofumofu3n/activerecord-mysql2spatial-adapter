@@ -77,7 +77,6 @@ module ActiveRecord
           NATIVE_DATABASE_TYPES
         end
 
-
         def quote(value_, column_=nil)
           if ::RGeo::Feature::Geometry.check_type(value_)
             "GeomFromWKB(0x#{::RGeo::WKRep::WKBGenerator.new(:hex_format => true).generate(value_)},#{value_.srid})"
@@ -85,7 +84,6 @@ module ActiveRecord
             super
           end
         end
-
 
         def type_to_sql(type_, limit_=nil, precision_=nil, scale_=nil)
           if (info_ = spatial_column_constructor(type_.to_sym))
@@ -117,7 +115,7 @@ module ActiveRecord
             sql_type = field_[:Type]
             cast_type = lookup_cast_type(sql_type)
             columns_ << SpatialColumn.new(@rgeo_factory_settings, table_name_.to_s,
-              field_[:Field], field_[:Default], field_[:Type], field_[:Null] == "YES", cast_type)
+              field_[:Field], field_[:Default], sql_type, field_[:Null] == "YES", cast_type)
           end
           columns_
         end
@@ -143,6 +141,26 @@ module ActiveRecord
             last_index_.lengths << row_[:Sub_part] unless last_index_.spatial
           end
           indexes_
+        end
+
+        def initialize_type_map(map)
+          super
+
+          %w(
+            geometry
+            geometry_collection
+            line_string
+            multi_line_string
+            multi_point
+            multi_polygon
+            point
+            polygon
+            )
+            .each do |geo_type|
+              map.register_type(geo_type) do |oid, _, sql_type|
+                Spatial.new(oid, sql_type)
+              end
+            end
         end
 
 

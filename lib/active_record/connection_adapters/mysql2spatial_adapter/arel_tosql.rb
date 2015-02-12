@@ -57,16 +57,16 @@ module Arel
       def st_func(standard_name)
         if (name = FUNC_MAP[standard_name.downcase])
           name
-        elsif standard_name_ =~ /^st_(\w+)$/i
+        elsif standard_name =~ /^st_(\w+)$/i
           $1
         else
-          standard_name_
+          standard_name
         end
       end
 
       # Override equality nodes to use the ST_Equals function if at least
       # one of the operands is a spatial node.
-      def visit_Arel_Nodes_Equality node, collector = nil
+      def visit_Arel_Nodes_Equality(node, collector = nil)
         check_equality_for_rgeo(node, false) || super(node)
       rescue ArgumentError
         super(node, collector)
@@ -79,8 +79,18 @@ module Arel
         _check_equality_for_rgeo(node_, true) || super
       end
 
-      def visit_RGeo_ActiveRecord_SpatialNamedFunction(node, collector)
+      def visit_RGeo_ActiveRecord_SpatialNamedFunction(node, collector = nil)
         aggregate(st_func(node.name), node, collector)
+      rescue NoMethodError
+        super(node)
+      rescue ArgumentError
+        super(node, collector)
+      rescue => e
+        binding.pry
+      end
+
+      def visit_String(node, collector)
+        collector << "#{st_func('GeomFromText')}(#{quote(node)})"
       end
 
       private
