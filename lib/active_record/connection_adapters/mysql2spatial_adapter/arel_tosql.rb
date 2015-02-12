@@ -54,9 +54,9 @@ module Arel
 
       include ::RGeo::ActiveRecord::SpatialToSql
 
-      def st_func(standard_name_)
-        if (name_ = FUNC_MAP[standard_name_.downcase])
-          name_
+      def st_func(standard_name)
+        if (name = FUNC_MAP[standard_name.downcase])
+          name
         elsif standard_name_ =~ /^st_(\w+)$/i
           $1
         else
@@ -77,6 +77,10 @@ module Arel
 
       def visit_Arel_Nodes_NotEqual(node_)
         _check_equality_for_rgeo(node_, true) || super
+      end
+
+      def visit_RGeo_ActiveRecord_SpatialNamedFunction(node, collector)
+        aggregate(st_func(node.name), node, collector)
       end
 
       private
