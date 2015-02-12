@@ -114,12 +114,19 @@ module ActiveRecord
           result_ = execute("SHOW FIELDS FROM #{quote_table_name(table_name_)}", :skip_logging)
           columns_ = []
           result_.each(:symbolize_keys => true, :as => :hash) do |field_|
+            sql_type = field_[:Type]
+            cast_type = lookup_cast_type(sql_type)
             columns_ << SpatialColumn.new(@rgeo_factory_settings, table_name_.to_s,
-              field_[:Field], field_[:Default], field_[:Type], field_[:Null] == "YES")
+              field_[:Field], field_[:Default], field_[:Type], field_[:Null] == "YES", cast_type)
           end
           columns_
         end
 
+        def lookup_cast_type(sql_type)
+          super(sql_type)
+        rescue NoMethodError
+          nil
+        end
 
         def indexes(table_name_, name_=nil)
           indexes_ = []
