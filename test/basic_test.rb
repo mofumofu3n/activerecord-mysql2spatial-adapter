@@ -60,7 +60,7 @@ class TestBasic < ::Minitest::Unit::TestCase
       t_.column 'latlon', :geometry
     end
     assert_equal(::RGeo::Feature::Geometry, klass_.columns.last.geometric_type)
-    assert(klass_.cached_attributes.include?('latlon'))
+    assert(klass_.attribute_method?('latlon'))
   end
 
 
@@ -70,7 +70,7 @@ class TestBasic < ::Minitest::Unit::TestCase
       t_.column 'latlon', :point
     end
     assert_equal(::RGeo::Feature::Point, klass_.columns.last.geometric_type)
-    assert(klass_.cached_attributes.include?('latlon'))
+    assert(klass_.attribute_method?('latlon'))
   end
 
   def test_create_geometry_with_index
@@ -201,7 +201,7 @@ class TestBasic < ::Minitest::Unit::TestCase
       t_.geometry 'geometry_shortcut'
     end
     assert_equal(::RGeo::Feature::Geometry, SpatialModel.columns.last.geometric_type)
-    assert(SpatialModel.new.respond_to?('geometry_shortcut'))
+    assert(SpatialModel.attribute_method?('geometry_shortcut'))
   end
 
   def test_create_point_geometry_using_shortcut
@@ -210,7 +210,7 @@ class TestBasic < ::Minitest::Unit::TestCase
       t_.point 'latlon_shortcut'
     end
     assert_equal(::RGeo::Feature::Point, SpatialModel.columns.last.geometric_type)
-    assert(SpatialModel.new.respond_to?(:latlon_shortcut))
+    assert(SpatialModel.attribute_method?(:latlon_shortcut))
   end
 
   def test_create_geometry_using_limit
@@ -220,7 +220,7 @@ class TestBasic < ::Minitest::Unit::TestCase
     end
     SpatialModel.reset_column_information
     assert_equal(::RGeo::Feature::LineString, SpatialModel.columns.last.geometric_type)
-    assert(SpatialModel.new.respond_to?(:geom))
+    assert(SpatialModel.attribute_method?(:geom))
   end
 
   private
