@@ -1,4 +1,4 @@
-# -----------------------------------------------------------------------------
+# a  -----------------------------------------------------------------------------
 #
 # Tests for the Mysql2Spatial ActiveRecord adapter
 #
@@ -98,20 +98,20 @@ class TestBasic < ::Minitest::Unit::TestCase
     create_model
     obj_ = SpatialModel.new
     assert_nil(obj_.latlon)
-    obj_.latlon = 'SRID=3785;POINT(1 2)'
+    obj_.latlon = 'POINT(1 2)'
     assert_equal(@factory.point(1, 2), obj_.latlon)
     assert_equal(3785, obj_.latlon.srid)
   end
 
   def test_save_and_load_point
     create_model
-    obj_ = SpatialModel.new
-    obj_.latlon = @factory.point(1, 2)
-    obj_.save!
-    id_ = obj_.id
-    obj2_ = SpatialModel.find(id_)
-    assert_equal(@factory.point(1, 2), obj2_.latlon)
-    assert_equal(3785, obj2_.latlon.srid)
+    obj = SpatialModel.new
+    obj.latlon = @factory.point(1, 2)
+    obj.save!
+    id = obj.id
+    obj2 = SpatialModel.find(id)
+    assert_equal(@factory.point(1, 2), obj2.latlon)
+    assert_equal(3785, obj2.latlon.srid)
   end
 
   # TODO: make pass
@@ -130,7 +130,7 @@ class TestBasic < ::Minitest::Unit::TestCase
   def test_save_and_load_point_from_wkt
     create_model
     obj_ = SpatialModel.new
-    obj_.latlon = 'SRID=3785;POINT(1 2)'
+    obj_.latlon = 'POINT(1 2)'
     obj_.save!
     id_ = obj_.id
     obj2_ = SpatialModel.find(id_)
@@ -147,7 +147,6 @@ class TestBasic < ::Minitest::Unit::TestCase
   # TODO
   # def test_set_point_wkt_wrong_type
   #   klass_ = populate_ar_class(:latlon_point)
-  #   binding.pry
   #   assert_raises(ActiveRecord::StatementInvalid) do
   #     klass_.create(latlon: 'LINESTRING(1 2, 3 4, 5 6)')
   #   end

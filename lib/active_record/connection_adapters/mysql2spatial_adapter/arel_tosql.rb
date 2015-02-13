@@ -85,8 +85,6 @@ module Arel
         super(node)
       rescue ArgumentError
         super(node, collector)
-      rescue => e
-        binding.pry
       end
 
       def visit_String(node, collector)

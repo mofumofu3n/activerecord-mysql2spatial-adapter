@@ -50,12 +50,9 @@ module ActiveRecord
 
       class SpatialColumn < column_base_class_
 
-
         FACTORY_SETTINGS_CACHE = {}
 
-
         def initialize(factory_settings, table_name, name, default, sql_type = nil, null = true, cast_type = nil)
-          binding.pry
           @factory_settings = factory_settings
           @table_name = table_name
           if cast_type
@@ -83,15 +80,13 @@ module ActiveRecord
           type == :spatial ? ::RGeo::Feature::Geometry : super
         end
 
-
-        def type_cast(value_)
+        def type_cast(value)
           if type == :spatial
-            SpatialColumn.convert_to_geometry(value_, @factory_settings, @table_name, name)
+            SpatialColumn.convert_to_geometry(value, @factory_settings, @table_name, name)
           else
             super
           end
         end
-
 
         def type_cast_code(var_name_)
           if type == :spatial
@@ -103,34 +98,40 @@ module ActiveRecord
           end
         end
 
-
         private
-
         def simplified_type(sql_type_)
           sql_type_ =~ /geometry|point|linestring|polygon/i ? :spatial : super
         end
 
-
-        def self.convert_to_geometry(input_, factory_settings_, table_name_, column_)
+        def self.convert_to_geometry(input_, factory_, table_name_ = nil, column_ = nil)
           case input_
           when ::RGeo::Feature::Geometry
-            factory_ = factory_settings_.get_column_factory(table_name_, column_, :srid => input_.srid)
+            unless table_name_.nil?
+              factory_ = factory_settings_.get_column_factory(table_name_, column_, :srid => input_.srid)
+            end
             ::RGeo::Feature.cast(input_, factory_) rescue nil
           when ::String
             marker_ = input_[4,1]
             if marker_ == "\x00" || marker_ == "\x01"
-              factory_ = factory_settings_.get_column_factory(table_name_, column_,
-                :srid => input_[0,4].unpack(marker_ == "\x01" ? 'V' : 'N').first)
-              ::RGeo::WKRep::WKBParser.new(factory_).parse(input_[4..-1]) rescue nil
+              srid = input_[0,4].unpack(marker_ == "\x01" ? 'V' : 'N').first
+              unless table_name_.nil?
+                factory_ = factory_settings_.get_column_factory(table_name_, column_,
+                :srid => srid)
+              end
+              ::RGeo::WKRep::WKBParser.new(factory_, default_srid: srid).parse(input_[4..-1]) rescue nil
             elsif input_[0,10] =~ /[0-9a-fA-F]{8}0[01]/
               srid_ = input_[0,8].to_i(16)
               if input[9,1] == '1'
                 srid_ = [srid_].pack('V').unpack('N').first
               end
-              factory_ = factory_settings_.get_column_factory(table_name_, column_, :srid => srid_)
-              ::RGeo::WKRep::WKBParser.new(factory_).parse(input_[8..-1]) rescue nil
+              unless table_name_.nil?
+                factory_ = factory_settings_.get_column_factory(table_name_, column_, :srid => srid_)
+              end
+              ::RGeo::WKRep::WKBParser.new(factory_, default_srid: srid_).parse(input_[8..-1]) rescue nil
             else
-              factory_ = factory_settings_.get_column_factory(table_name_, column_)
+              unless table_name_.nil?
+                factory_ = factory_settings_.get_column_factory(table_name_, column_)
+              end
               ::RGeo::WKRep::WKTParser.new(factory_, :support_ewkt => true).parse(input_) rescue nil
             end
           else

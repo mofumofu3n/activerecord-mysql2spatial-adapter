@@ -84,7 +84,9 @@ end
 
 
 require 'active_record/connection_adapters/mysql2spatial_adapter/version.rb'
-require 'active_record/connection_adapters/mysql2spatial_adapter/spatial.rb'
+if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 2
+  require 'active_record/connection_adapters/mysql2spatial_adapter/spatial.rb'
+end
 require 'active_record/connection_adapters/mysql2spatial_adapter/main_adapter.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/spatial_column.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/arel_tosql.rb'
