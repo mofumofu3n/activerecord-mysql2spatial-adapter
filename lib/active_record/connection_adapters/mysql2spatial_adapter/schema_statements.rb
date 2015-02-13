@@ -96,7 +96,6 @@ module ActiveRecord
           end
         end
 
-        private
         def lookup_cast_type(sql_type)
           super(sql_type)
         rescue NoMethodError
