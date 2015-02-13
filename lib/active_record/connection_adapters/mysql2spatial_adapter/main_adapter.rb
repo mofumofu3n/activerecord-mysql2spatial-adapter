@@ -43,6 +43,7 @@ module ActiveRecord
         include Mysql2SpatialAdapter::SchemaStatements
 
         NATIVE_DATABASE_TYPES = Mysql2Adapter::NATIVE_DATABASE_TYPES.merge(:spatial => {:name => "geometry"})
+								DEFAULT_SRID = 3795
 
         def initialize(*args_)
           super

@@ -93,3 +93,23 @@ require 'active_record/connection_adapters/mysql2spatial_adapter/schema_statemen
 require 'active_record/connection_adapters/mysql2spatial_adapter/main_adapter.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/spatial_column.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/arel_tosql.rb'
+
+module RGeo
+  module ImplHelper  # :nodoc:
+    module BasicPointMethods
+      def equals?(rhs_)
+        # return false unless rhs_.is_a?(self.class) && rhs_.factory == self.factor
+        case rhs_
+        when Feature::Point
+          rhs_.x == @x && rhs_.y == @y
+        when Feature::LineString
+          rhs_.num_points > 0 && rhs_.points.all?{ |elem_| equals?(elem_) }
+        when Feature::GeometryCollection
+          rhs_.num_geometries > 0 && rhs_.all?{ |elem_| equals?(elem_) }
+        else
+          false
+        end
+      end
+    end
+  end
+end

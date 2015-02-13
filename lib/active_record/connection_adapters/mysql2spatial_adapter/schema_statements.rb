@@ -24,7 +24,7 @@ module ActiveRecord
           sql = "SHOW FULL FIELDS FROM #{quote_table_name(table_name)}"
           execute_and_free(sql, 'SCHEMA') do |result|
             each_hash(result).map do |field|
-              field_name = set_field_encoding(field[:Field])
+              field_name = respond_to?(:set_field_encoding) ? set_field_encoding(field[:Field]) : field[:Field]
               sql_type = field[:Type]
               cast_type = lookup_cast_type(sql_type)
               new_column(table_name, field_name, field[:Default], sql_type,

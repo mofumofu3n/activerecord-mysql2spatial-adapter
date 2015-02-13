@@ -107,7 +107,7 @@ module ActiveRecord
           case input_
           when ::RGeo::Feature::Geometry
             unless table_name_.nil?
-              factory_ = factory_settings_.get_column_factory(table_name_, column_, :srid => input_.srid)
+              factory_ = factory_.get_column_factory(table_name_, column_, :srid => input_.srid)
             end
             ::RGeo::Feature.cast(input_, factory_) rescue nil
           when ::String
@@ -115,7 +115,7 @@ module ActiveRecord
             if marker_ == "\x00" || marker_ == "\x01"
               srid = input_[0,4].unpack(marker_ == "\x01" ? 'V' : 'N').first
               unless table_name_.nil?
-                factory_ = factory_settings_.get_column_factory(table_name_, column_,
+                factory_ = factory_.get_column_factory(table_name_, column_,
                 :srid => srid)
               end
               ::RGeo::WKRep::WKBParser.new(factory_, default_srid: srid).parse(input_[4..-1]) rescue nil
@@ -125,12 +125,12 @@ module ActiveRecord
                 srid_ = [srid_].pack('V').unpack('N').first
               end
               unless table_name_.nil?
-                factory_ = factory_settings_.get_column_factory(table_name_, column_, :srid => srid_)
+                factory_ = factory_.get_column_factory(table_name_, column_, :srid => srid_)
               end
               ::RGeo::WKRep::WKBParser.new(factory_, default_srid: srid_).parse(input_[8..-1]) rescue nil
             else
               unless table_name_.nil?
-                factory_ = factory_settings_.get_column_factory(table_name_, column_)
+                factory_ = factory_.get_column_factory(table_name_, column_)
               end
               ::RGeo::WKRep::WKTParser.new(factory_, :support_ewkt => true).parse(input_) rescue nil
             end
