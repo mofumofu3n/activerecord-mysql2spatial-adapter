@@ -36,6 +36,7 @@
 
 require 'rgeo/active_record'
 require 'active_record/connection_adapters/mysql2_adapter'
+require 'active_record/connection_adapters/abstract_mysql_adapter'
 
 
 # The activerecord-mysql2spatial-adapter gem installs the *mysql2spatial*
@@ -87,6 +88,8 @@ require 'active_record/connection_adapters/mysql2spatial_adapter/version.rb'
 if ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 2
   require 'active_record/connection_adapters/mysql2spatial_adapter/spatial.rb'
 end
+require 'active_record/connection_adapters/mysql2spatial_adapter/spatial_table_definition.rb'
+require 'active_record/connection_adapters/mysql2spatial_adapter/schema_statements.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/main_adapter.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/spatial_column.rb'
 require 'active_record/connection_adapters/mysql2spatial_adapter/arel_tosql.rb'

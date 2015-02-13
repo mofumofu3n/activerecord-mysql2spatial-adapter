@@ -163,20 +163,18 @@ class TestBasic < ::Minitest::Unit::TestCase
     assert_equal factory, object.class.rgeo_factory_for_column(:latlon)
   end
 
-  def test_readme_example
-    create_model
-    GeographicModel.connection.change_table(:spatial_models) do |t|
-      t.change :latlon, :point, null: false
-      t.index(:latlon, :spatial => true)
-    end
-    assert_includes GeographicModel.columns.map(&:name), "shape"
-    rec_ = GeographicModel.new
-    rec_.latlon = 'POINT(-122 47)'
-    loc_ = rec_.latlon
-    assert_equal(47, loc_.latitude)
-    rec_.shape = loc_
-    # assert_equal(true, ::RGeo::Geos.is_geos?(rec_.shape))
-  end
+  # def test_readme_example
+    # create_model
+    # GeographicModel.connection.change_table(:spatial_models) do |t|
+    #   t.change :geo_latlon, :point, null: false
+    #   t.index(:latlon, :spatial => true)
+    # end
+    # assert_includes GeographicModel.columns.map(&:name), "shape"
+    # rec_ = GeographicModel.new
+    # rec_.latlon_geo = 'POINT(-122 47)'
+    # loc_ = rec_.latlon_geo
+    # assert_equal(47, loc_.latitude)
+  # end
 
   def test_point_to_json
     create_model
@@ -205,8 +203,8 @@ class TestBasic < ::Minitest::Unit::TestCase
 
   def test_create_point_geometry_using_shortcut
     create_model
-    SpatialModel.connection.change_table(:spatial_models) do |t_|
-      t_.point 'latlon_shortcut'
+    SpatialModel.connection.change_table(:spatial_models) do |t|
+      t.point 'latlon_shortcut'
     end
     assert_equal(::RGeo::Feature::Point, SpatialModel.columns.last.geometric_type)
     assert(SpatialModel.attribute_method?(:latlon_shortcut))
@@ -225,10 +223,10 @@ class TestBasic < ::Minitest::Unit::TestCase
   private
   def create_model
     SpatialModel.connection.create_table(:spatial_models, force: true, :options => 'ENGINE=MyISAM' ) do |t|
-      t.column 'latlon', :point, srid: 3785
-      t.column 'latlon_geo', :point, srid: 4326, geographic: true
-      t.column :path, :line_string
-      t.column :shape, :geometry
+      t.point 'latlon', srid: 3785
+      t.point 'latlon_geo', srid: 4326, geographic: true
+      t.line_string :path
+      t.geometry :shape
     end
     SpatialModel.reset_column_information
   end
