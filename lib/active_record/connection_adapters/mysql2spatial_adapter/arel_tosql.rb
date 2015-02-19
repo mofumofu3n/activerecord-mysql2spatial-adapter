@@ -75,8 +75,10 @@ module Arel
       # Override equality nodes to use the ST_Equals function if at least
       # one of the operands is a spatial node.
 
-      def visit_Arel_Nodes_NotEqual(node_)
-        _check_equality_for_rgeo(node_, true) || super
+      def visit_Arel_Nodes_NotEqual(node_, collector = nil)
+        check_equality_for_rgeo(node_, true) || super
+      rescue ArgumentError
+        super(node, collector)
       end
 
       def visit_RGeo_ActiveRecord_SpatialNamedFunction(node, collector = nil)

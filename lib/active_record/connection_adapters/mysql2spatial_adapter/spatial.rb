@@ -41,9 +41,11 @@ module ActiveRecord
 
         # convert WKT string into RGeo object
         def parse_wkt(string)
+          value, srid = string.split(",")
+          @srid = srid if srid.present?
           # factory = factory_settings.get_column_factory(table_name, column, constraints)
           factory = @factory_generator || RGeo::ActiveRecord::RGeoFactorySettings.new
-          wkt_parser(factory, string).parse(string)
+          wkt_parser(factory, value).parse(value)
         rescue RGeo::Error::ParseError
           nil
         end

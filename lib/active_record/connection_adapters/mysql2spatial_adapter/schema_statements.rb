@@ -13,7 +13,7 @@ module ActiveRecord
         def native_database_types
           super.merge({
             :point       => { :name => "point" },
-            :linestring => { :name => "linestring" },
+            :line_string => { :name => "linestring" },
             :polygon     => { :name => "polygon" },
             :geometry    => { :name => "geometry" }
           })
@@ -66,6 +66,7 @@ module ActiveRecord
             geometry
             geometry_collection
             line_string
+            linestring
             multi_line_string
             multi_point
             multi_polygon
