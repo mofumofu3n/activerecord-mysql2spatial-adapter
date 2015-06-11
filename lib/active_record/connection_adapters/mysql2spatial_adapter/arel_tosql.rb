@@ -50,7 +50,9 @@ module Arel
         'st_wkbtosql' => 'GeomFromWKB',
         'st_length' => 'GLength',
         'st_distance' => 'ST_Distance',
-        'st_overlaps' => 'ST_Overlaps'
+        'st_overlaps' => 'ST_Overlaps',
+        'st_equals' => "ST_Equals",
+        'st_contains' => 'ST_Contains'
       }
 
       include ::RGeo::ActiveRecord::SpatialToSql
