@@ -56,6 +56,6 @@
   spec.add_development_dependency 'appraisal'
 
   spec.add_dependency 'activerecord', '>= 3.2'
-  spec.add_dependency 'rgeo-activerecord'
+  spec.add_dependency 'rgeo-activerecord', '~> 2.0'
   spec.add_dependency 'mysql2', '>= 0.2.13'
 end
